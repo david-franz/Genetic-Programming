@@ -1,6 +1,3 @@
-# fitness function:
-# sum of squared area of function vs given points
-
 # https://deap.readthedocs.io/en/master/examples/gp_symbreg.html
 
 from deap import gp, creator, base, tools, algorithms
@@ -10,9 +7,7 @@ import math
 import random
 import numpy as np
 
-# decided not to do division or protected division because polynomial approximation
-
-# values of original function
+# given values of original function
 mapping_dictionary = {	-2.00 : 37.00000,
 						-1.75 : 24.16016,
 						-1.50 : 15.06250,
@@ -38,6 +33,8 @@ mapping_dictionary = {	-2.00 : 37.00000,
 float_range_array = np.arange(-2.0, 3.0, 0.25)
 float_range_list = list(float_range_array)
 
+# fitness function:
+# sum of squared area of function vs given points
 def evalSymbReg(individual):
 	# Transform the tree expression in a callable function
 	func = toolbox.compile(expr=individual)
@@ -48,7 +45,7 @@ def evalSymbReg(individual):
 		mapping_dictionary[x]
 		squared_error += (func(x) - mapping_dictionary[x])**2
 	
-	return squared_error / len(float_range_list),
+	return squared_error,
 
 if __name__ == '__main__':
 
@@ -56,7 +53,6 @@ if __name__ == '__main__':
 	pset.addPrimitive(operator.add, 2)
 	pset.addPrimitive(operator.sub, 2)
 	pset.addPrimitive(operator.mul, 2)
-	#pset.addPrimitive(protectedDiv, 2)
 	pset.addPrimitive(operator.neg, 1)
 	pset.addEphemeralConstant("rand101", lambda: random.randint(-1,1))
 	pset.renameArguments(ARG0="x")
@@ -74,7 +70,7 @@ if __name__ == '__main__':
 	toolbox.register("evaluate", evalSymbReg)
 	toolbox.register("select", tools.selTournament, tournsize=3)
 	toolbox.register("mate", gp.cxOnePoint)
-	toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
+	toolbox.register("expr_mut", gp.genFull, min_=0, max_=3)
 	toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 	
 	toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=7))
@@ -88,9 +84,12 @@ if __name__ == '__main__':
 	mstats.register("min", np.min)
 	mstats.register("max", np.max)
 
-	pop = toolbox.population(n=300)
+	pop = toolbox.population(n=2700)
 	hof = tools.HallOfFame(1)
 
-	pop, log = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats, halloffame=hof, verbose=True)
-
-	print("{}\n".format(hof[0]))
+	pop, log = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats, halloffame=hof, verbose=False)
+	
+	print("------------------------------")
+	print("function = {}\n".format(hof[0]))
+	print("fitness = {}\n".format(evalSymbReg(hof[0])))
+	print("------------------------------")
