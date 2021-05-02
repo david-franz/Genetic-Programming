@@ -45,7 +45,7 @@ def evalSymbReg(individual):
 		mapping_dictionary[x]
 		squared_error += (func(x) - mapping_dictionary[x])**2
 	
-	return squared_error,
+	return (1 / len(float_range_list)) * squared_error,
 
 if __name__ == '__main__':
 
@@ -73,8 +73,8 @@ if __name__ == '__main__':
 	toolbox.register("expr_mut", gp.genFull, min_=0, max_=3)
 	toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 	
-	toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=7))
-	toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=7))
+	toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=5))
+	toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=5))
 
 	stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
 	stats_size = tools.Statistics(len)
@@ -84,12 +84,12 @@ if __name__ == '__main__':
 	mstats.register("min", np.min)
 	mstats.register("max", np.max)
 
-	pop = toolbox.population(n=2700)
+	pop = toolbox.population(n=10000)
 	hof = tools.HallOfFame(1)
 
 	pop, log = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats, halloffame=hof, verbose=False)
 	
-	print("------------------------------")
+	print("\n------------------------------------------------------------")
 	print("function = {}\n".format(hof[0]))
-	print("fitness = {}\n".format(evalSymbReg(hof[0])))
-	print("------------------------------")
+	print("fitness = {}".format(evalSymbReg(hof[0])))
+	print("------------------------------------------------------------\n")
