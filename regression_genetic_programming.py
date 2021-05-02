@@ -1,11 +1,18 @@
-# https://deap.readthedocs.io/en/master/examples/gp_symbreg.html
+# Note: for part 2, my code was adapted from the code discussed in these tutorials:
+# https://deap.readthedocs.io/en/master/examples/gp_symbreg.html 
+# and 
+# https://deap.readthedocs.io/en/master/tutorials/advanced/gp.html
 
 from deap import gp, creator, base, tools, algorithms
-import deap
+import numpy as np
 import operator
 import math
 import random
-import numpy as np
+
+print("\nNote that this takes a while to run with the current parameters (~30 seonds on my computer). If you want a faster run, feel free to drop the population_size parameter at the top of the code. This will probably give less accurate functions (with higher fitness).")
+
+depth_of_tree = 4
+population_size = 15000
 
 # given values of original function
 mapping_dictionary = {	-2.00 : 37.00000,
@@ -48,7 +55,6 @@ def evalSymbReg(individual):
 	return (1 / len(float_range_list)) * squared_error,
 
 if __name__ == '__main__':
-
 	pset = gp.PrimitiveSet("MAIN", 1)
 	pset.addPrimitive(operator.add, 2)
 	pset.addPrimitive(operator.sub, 2)
@@ -73,8 +79,8 @@ if __name__ == '__main__':
 	toolbox.register("expr_mut", gp.genFull, min_=0, max_=3)
 	toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 	
-	toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=5))
-	toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=5))
+	toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=depth_of_tree))
+	toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=depth_of_tree))
 
 	stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
 	stats_size = tools.Statistics(len)
@@ -84,7 +90,7 @@ if __name__ == '__main__':
 	mstats.register("min", np.min)
 	mstats.register("max", np.max)
 
-	pop = toolbox.population(n=10000)
+	pop = toolbox.population(n=population_size)
 	hof = tools.HallOfFame(1)
 
 	pop, log = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats, halloffame=hof, verbose=False)
